@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      node-version: 12.x
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Azure Login
+      uses: Azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Use Node.js ${{ env.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.node-version }}
+    - name: npm install
+      run: |
+        npm ci
+    - name: npm install jetzt and fix
+      run: |
+        npm install -D jetzt
+        # fix bug from next-server package files moving under next
+        find node_modules/jetzt -name "parseNextConfig.*" -exec sed -i "s/next-server\/dist/next\/dist\/next-server/g" {} +
+        # fix proxy template for static files so any request for an asset with an extension is proxied to storage (TODO: how reliable is this?)
+        find node_modules/jetzt/ -name "templates.*" -exec sed -i -e "s/static\/{\*asset}/{asset}.{ext}/g" -e "s/static\/{asset}/public\/{asset}.{ext}/g" {} +
+        # fix bug where static files are now expected to be stored in public directory
+        find node_modules/jetzt/ -name "deploy.*" -exec sed -i "s/static/public/g" {} +
+        # make sure public directory exists to prevent jetzt from failing
+        mkdir -p public
+    - name: generate jetzt config
+      run: |
+        echo "generating jetzt config file"
+        resource_group=`az group show --name ${{ secrets.AZ_FUNC_RESOURCE_GROUP }}`
+        location=$(node -p "var rg = ${resource_group}; rg.location")
+        echo "{\"functionApp\":{\"subscriptionId\":\"${{ secrets.AZ_SUBSCRIPTION_ID }}\",\"resourceGroup\":\"${{ secrets.AZ_FUNC_RESOURCE_GROUP }}\",\"location\":\"${location}\",\"name\":\"${{ secrets.AZ_FUNC_NAME }}\"},\"storage\":{\"account\":\"${{ secrets.AZ_STORAGE_NAME }}\"}}" > jetzt.config.json
+    - name: build with jetzt
+      run: npx jetzt .
+    - name: Upload the application settings
+      id: upload_app_settings_id
+      uses: GiridharanNarayanan/upload_app_settings@master
+      with:
+        app_secrets: ${{ secrets.APP_SECRETS }}
+        az_func_name: ${{ secrets.AZ_FUNC_NAME }}
+        az_func_resource_group: ${{ secrets.AZ_FUNC_RESOURCE_GROUP }}
+      env:
+        CI: true
