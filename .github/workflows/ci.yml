@@ -1,0 +1,21 @@
+name: CI
+on:
+  push:
+    branches: master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Azure Login
+      uses: Azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: npm install
+      run: npm ci
+    - name: Publish next function
+      uses: thomasf7/publish-next-function@master
+      with:
+        configuration: ${{ secrets.CONFIGURATION }}
+        app-settings: ${{ secrets.APPSETTINGS }}
