@@ -7,7 +7,7 @@ interface Props {
 const Home = (props: Props) => {
     return (
         <>
-            <h1>Hello {props.name}!</h1>
+            <h1>Hello from PR {props.name}!</h1>
             <ul>
                 <li><a href="/second">Go to the second page</a></li>
                 <li><a href="/third">Go to the third page</a></li>
