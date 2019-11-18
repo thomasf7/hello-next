@@ -1,0 +1,25 @@
+name: Pull Request
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+jobs:
+  pull_request:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      if: github.event.action != 'closed'
+      uses: actions/checkout@v1
+    - name: npm install
+      if: github.event.action != 'closed'
+      run: npm ci
+    - name: Azure Login
+      uses: Azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Publish next function
+      uses: thomasf7/publish-next-function@master
+      with:
+        configuration: ${{ secrets.CONFIGURATION }}
+        app-settings: ${{ secrets.APPSETTINGS }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        pull-request: true
