@@ -6,14 +6,14 @@ jobs:
   pull_request:
     runs-on: ubuntu-latest
     steps:
-      - name: Placeholder
-        run: echo 'Hello world.'
-#     - name: Checkout
-#       if: github.event.action != 'closed'
-#       uses: actions/checkout@v1
-#     - name: npm install
-#       if: github.event.action != 'closed'
-#       run: npm ci
+    - name: Checkout
+      if: github.event.action != 'closed'
+      uses: actions/checkout@v1
+    - name: npm install
+      if: github.event.action != 'closed'
+      run: npm ci
+    - name: build
+      run: npm run build
 #     - name: Azure Login
 #       uses: Azure/login@v1
 #       with:
