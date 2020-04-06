@@ -1,11 +1,13 @@
-# name: Pull Request
-# on:
-#   pull_request:
-#     types: [opened, synchronize, reopened, closed]
-# jobs:
-#   pull_request:
-#     runs-on: ubuntu-latest
-#     steps:
+name: Pull Request
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+jobs:
+  pull_request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: echo 'Hello world.'
 #     - name: Checkout
 #       if: github.event.action != 'closed'
 #       uses: actions/checkout@v1
