@@ -13,6 +13,7 @@ jobs:
       if: github.event.action != 'closed'
       run: npm ci
     - name: build
+      if: github.event.action != 'closed'
       run: npm run build
 #     - name: Azure Login
 #       uses: Azure/login@v1
